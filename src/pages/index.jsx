@@ -1,31 +1,31 @@
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { useEffect } from "react";
 import { auth } from "../lib/firebase/firebase.config";
+import { signInWithRedirect, getRedirectResult, GoogleAuthProvider } from "firebase/auth";
 
 export default function Home() {
- 
+  useEffect(() => {
+    const checkRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+
+        if (result) {
+          // Usuário logado com sucesso
+          console.log("Usuário:", result.user);
+          console.log("Token:", result._tokenResponse);
+        } else {
+          console.log("Nenhum resultado de login (normal se for primeira vez).");
+        }
+      } catch (error) {
+        console.error("Erro ao obter resultado de redirect:", error);
+      }
+    };
+
+    checkRedirectResult();
+  }, []);
+  
   const handleLogin = () => {
     const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        // This gives you a Google Access Token. You can use it to access the Google API.
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        const token = credential.accessToken;
-        // The signed-in user info.
-        const user = result.user;
-        // IdP data available using getAdditionalUserInfo(result)
-
-        console.log(user);
-      })
-      .catch((error) => {
-        // Handle Errors here.
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        // The email of the user's account used.
-        const email = error.customData.email;
-        // The AuthCredential type that was used.
-        const credential = GoogleAuthProvider.credentialFromError(error);
-        // ...
-      });
+    signInWithRedirect(auth, provider);
   };
 
   return (
