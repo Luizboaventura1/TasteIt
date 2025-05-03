@@ -16,12 +16,10 @@ import {
 import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 class RecipeService implements IRecipeService {
-  constructor(
-    private authService: IAuthService
-  ) {}
+  constructor(private authService: IAuthService) {}
 
   async addRecipe(
-    recipe: Pick<Recipe, "title" | "description">,
+    recipe: Pick<Recipe, "title" | "description" | "category">,
     image: File | null
   ): Promise<string | void> {
     const newRecipeRef = doc(collection(firestore, "recipes"));
@@ -50,6 +48,7 @@ class RecipeService implements IRecipeService {
         author: userName,
         title: recipe.title,
         description: recipe.description,
+        category: recipe.category,
         createAt: new Date(),
       };
 
@@ -70,7 +69,6 @@ class RecipeService implements IRecipeService {
 
       const imageRef = ref(storage, `recipesImages/${recipeId}`);
       await deleteObject(imageRef);
-
     } catch (error: Error | unknown) {
       if (error instanceof Error) {
         return error.message;
@@ -90,6 +88,7 @@ class RecipeService implements IRecipeService {
         author: recipe.author,
         userId: recipe.userId,
         createAt: recipe.createAt,
+        category: recipe.category,
       };
 
       await updateDoc(recipeRef, updateData);

@@ -1,5 +1,6 @@
 import RecipeService from "../services/recipeService";
 import AuthService from "../services/authService";
+import RecipeCategory from "@/enums/RecipeCategory";
 import { useRef, useState } from "react";
 
 export default function Login() {
@@ -13,7 +14,7 @@ export default function Login() {
       return;
     }
     await recipeService
-      .addRecipe({ title: "Farofa preta", description: "Donuts processo" }, imageFile)
+      .addRecipe({ title: "Farofa preta", description: "Donuts processo" , category: RecipeCategory.BAKERY}, imageFile)
       .then(() => {
         console.log("Receita adicionada com sucesso!");
       })
