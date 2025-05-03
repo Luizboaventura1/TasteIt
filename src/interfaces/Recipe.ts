@@ -1,6 +1,7 @@
 interface Recipe {
+	id: string,
   userId: string,
-	image: string,
+	imageUrl: string,
 	author: string,
 	title: string,
 	description: string,
