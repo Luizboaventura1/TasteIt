@@ -1,8 +1,8 @@
 import { User } from "firebase/auth";
 
 interface IAuthService {
-  loginWithGoogle(): Promise<User | Error | unknown>;
-  signOut(): Promise<void | Error | string>;
+  loginWithGoogle(): Promise<User | Error>;
+  signOut(): Promise<void | Error>;
   getUserId(): string | Error;
   getUserData(): User | Error;
 }
