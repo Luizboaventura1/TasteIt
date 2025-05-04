@@ -1,4 +1,4 @@
-import { FirebaseAuthErrorMessages } from "@/constants/firebaseErrorMessages";
+import { FirebaseAuthErrorMessages } from "../constants/firebaseErrorMessages"
 import { FirebaseError } from "firebase/app";
 import { GoogleAuthProvider, signInWithPopup, User } from "firebase/auth";
 import { auth } from "../lib/firebase/firebase.config";
@@ -7,7 +7,7 @@ import IAuthService from "@/interfaces/IAuthService";
 class AuthService implements IAuthService {
   private provider = new GoogleAuthProvider();
 
-  async loginWithGoogle(): Promise<User | Error | unknown> {
+  async loginWithGoogle(): Promise<User | Error> {
     try {
       const result = await signInWithPopup(auth, this.provider);
       const user = result.user;
@@ -17,7 +17,7 @@ class AuthService implements IAuthService {
       }
 
       return user;
-    } catch (error: unknown) {
+    } catch (error: Error | unknown) {
       let errorMessage = "Ocorreu um erro durante o login. Por favor, tente novamente.";
 
       if (error instanceof FirebaseError) {
@@ -26,29 +26,29 @@ class AuthService implements IAuthService {
           FirebaseAuthErrorMessages["default"];
       } else if (error instanceof Error) {
         errorMessage = `Erro inesperado: ${error.message}`;
-      } else {
-        errorMessage = "Erro desconhecido";
       }
 
-      throw new Error(errorMessage);
+      return new Error(errorMessage);
     }
   }
 
-  async signOut(): Promise<void | Error | string> {
+  async signOut(): Promise<void | Error> {
     try {
       await auth.signOut();
     } catch (error: Error | unknown) {
       if (error instanceof Error) {
-        return error.message;
+        return new Error(error.message);
       }
-      return "Erro inesperado ao fazer signOut. Por favor, tente novamente.";
+      return new Error("Erro inesperado ao fazer signOut. Por favor, tente novamente.");
     }
   }
 
   getUserId(): string | Error {
     const user = auth.currentUser;
 
-    if (!user) throw new Error("Usuário não autenticado. Por favor, faça login novamente.");
+    if (!user) {
+      return new Error("Usuário não autenticado. Por favor, faça login novamente.");
+    }
 
     return user.uid;
   }
@@ -56,7 +56,9 @@ class AuthService implements IAuthService {
   getUserData(): User | Error {
     const user = auth.currentUser;
 
-    if (!user) throw new Error("Usuário não autenticado. Por favor, faça login novamente.");
+    if (!user) {
+      return new Error("Usuário não autenticado. Por favor, faça login novamente.");
+    }
 
     return user;
   }

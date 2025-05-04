@@ -21,29 +21,29 @@ class RecipeService implements IRecipeService {
   async addRecipe(
     recipe: Pick<Recipe, "title" | "description" | "category">,
     image: File | null
-  ): Promise<string | void> {
+  ): Promise<void | Error> {
     const newRecipeRef = doc(collection(firestore, "recipes"));
     const storageRef = ref(storage, `recipesImages/${newRecipeRef.id}`);
 
     try {
-      const userGoogleData: User = this.authService.getUserData() as User;
+      const userGoogleData = await this.authService.getUserData();
 
       if (!userGoogleData || userGoogleData instanceof Error) {
-        throw new Error("Usuário não autenticado. Faça login novamente.");
+        return new Error("Usuário não autenticado. Faça login novamente.");
       }
 
       if (!image) {
-        throw new Error("Selecione uma imagem para a receita.");
+        return new Error("Selecione uma imagem para a receita.");
       }
 
-      const userName = userGoogleData?.displayName || "";
+      const userName = (userGoogleData as User)?.displayName || "";
 
       await uploadBytes(storageRef, image);
       const downloadURL = await getDownloadURL(storageRef);
 
       const recipeData: Recipe = {
         id: newRecipeRef.id,
-        userId: userGoogleData.uid,
+        userId: (userGoogleData as User).uid,
         imageUrl: downloadURL,
         author: userName,
         title: recipe.title,
@@ -53,31 +53,36 @@ class RecipeService implements IRecipeService {
       };
 
       await setDoc(newRecipeRef, recipeData);
+      return;
     } catch (error: Error | unknown) {
+      let errorMessage = "Erro inesperado ao adicionar receita. Por favor, tente novamente.";
+
       if (error instanceof Error) {
-        return error.message;
+        errorMessage = error.message;
       }
-      return "Erro inesperado ao adicionar receita. Por favor, tente novamente.";
+
+      return new Error(errorMessage);
     }
   }
 
-  async deleteRecipe(recipeId: string): Promise<void | string> {
+  async deleteRecipe(recipeId: string): Promise<void | Error> {
     try {
       const recipeRef = doc(firestore, "recipes", recipeId);
-
       await deleteDoc(recipeRef);
 
       const imageRef = ref(storage, `recipesImages/${recipeId}`);
       await deleteObject(imageRef);
+      return;
     } catch (error: Error | unknown) {
+      let errorMessage = "Erro inesperado ao deletar receita.";
       if (error instanceof Error) {
-        return error.message;
+        errorMessage = error.message;
       }
-      return "Erro inesperado ao deletar receita.";
+      return new Error(errorMessage);
     }
   }
 
-  async updateRecipe(recipeId: string, recipe: Recipe): Promise<Recipe | string> {
+  async updateRecipe(recipeId: string, recipe: Recipe): Promise<Recipe | Error> {
     try {
       const recipeRef = doc(firestore, "recipes", recipeId);
 
@@ -98,37 +103,38 @@ class RecipeService implements IRecipeService {
         ...updateData,
       };
     } catch (error: Error | unknown) {
+      let errorMessage = "Erro inesperado ao atualizar receita.";
       if (error instanceof Error) {
-        return error.message;
+        errorMessage = error.message;
       }
-      return "Erro inesperado ao atualizar receita.";
+      return new Error(errorMessage);
     }
   }
 
-  async getRecipeById(recipeId: string): Promise<Recipe | string> {
+  async getRecipeById(recipeId: string): Promise<Recipe | Error> {
     try {
       const recipeRef = doc(firestore, "recipes", recipeId);
       const docSnap = await getDoc(recipeRef);
 
       if (!docSnap.exists()) {
-        return "Receita não encontrada.";
+        return new Error("Receita não encontrada.");
       }
 
       const recipeData = docSnap.data() as Recipe;
       return recipeData;
     } catch (error: Error | unknown) {
+      let errorMessage = "Erro inesperado ao buscar receita.";
       if (error instanceof Error) {
-        return error.message;
+        errorMessage = error.message;
       }
-      return "Erro inesperado ao buscar receita.";
+      return new Error(errorMessage);
     }
   }
 
-  async getAllRecipes(): Promise<Recipe[] | string> {
+  async getAllRecipes(): Promise<Recipe[] | Error> {
     try {
       const recipesRef = collection(firestore, "recipes");
       const q = query(recipesRef);
-
       const querySnapshot = await getDocs(q);
 
       const recipes: Recipe[] = [];
@@ -138,10 +144,13 @@ class RecipeService implements IRecipeService {
 
       return recipes;
     } catch (error: Error | unknown) {
+      let errorMessage = "Erro inesperado ao listar receitas.";
+      
       if (error instanceof Error) {
-        return error.message;
+        errorMessage = error.message;
       }
-      return "Erro inesperado ao listar receitas.";
+
+      return new Error(errorMessage);
     }
   }
 }

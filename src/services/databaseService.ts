@@ -6,24 +6,32 @@ import UserData from "@/interfaces/UserData";
 import IDatabaseService from "@/interfaces/IDatabaseService";
 
 class DatabaseService implements IDatabaseService {
-  async checkUserExists(userId: string): Promise<boolean | string> {
+  async checkUserExists(userId: string): Promise<boolean | Error> {
     try {
       const userDocRef = doc(firestore, "users", userId);
       const userSnapshot = await getDoc(userDocRef);
 
       return userSnapshot.exists();
     } catch (error: unknown) {
+      let errorMessage = "Erro ao verificar se o usuário existe.";
+
       if (error instanceof FirebaseError) {
-        return "Erro ao verificar se o usuário existe";
+        errorMessage =
+          FirebaseAuthErrorMessages[error.code as keyof typeof FirebaseAuthErrorMessages] ||
+          errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
       }
 
-      return "Erro inesperado ao verificar se o usuário existe";
+      return new Error(errorMessage);
     }
   }
 
-  async getUserData(id: string): Promise<UserData | Error | string> {
+  async getUserData(id: string): Promise<UserData | Error> {
     try {
-      if (!id) throw new Error("id do usuário inválido");
+      if (!id) {
+        return new Error("id do usuário inválido");
+      }
 
       const userDocRef = doc(firestore, "users", id);
       const userSnapshot = await getDoc(userDocRef);
@@ -33,24 +41,33 @@ class DatabaseService implements IDatabaseService {
         return userData;
       }
 
-      throw new Error("Usuário não encontrado");
+      return new Error("Usuário não encontrado");
     } catch (error: Error | unknown) {
-      if (error instanceof Error) {
-        return error.message;
+      let errorMessage = "Erro inesperado ao obter os dados do usuário.";
+
+      if (error instanceof FirebaseError) {
+        errorMessage =
+          FirebaseAuthErrorMessages[error.code as keyof typeof FirebaseAuthErrorMessages] ||
+          errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
       }
 
-      return "Erro inesperado ao obter os dados do usuário";
+      return new Error(errorMessage);
     }
   }
 
-  async updateUserData(userData: UserData): Promise<void | Error | string> {
+  async updateUserData(userData: UserData): Promise<void | Error> {
     try {
-      if (!await this.checkUserExists(userData.id)) throw new Error("Id do usuário inválido.");
+      const userExistsResult = await this.checkUserExists(userData.id);
+
+      if (userExistsResult instanceof Error) return userExistsResult;
+      if (!userExistsResult) return new Error("Id do usuário inválido.");
 
       const userDocRef = doc(firestore, "users", userData.id);
-      await setDoc(userDocRef, userData, { merge: true });
 
-      return "Dados do usuário atualizados com sucesso!";
+      await setDoc(userDocRef, userData, { merge: true });
+      return;
     } catch (error: unknown) {
       let errorMessage = "Ocorreu um erro ao atualizar os dados. Por favor, tente novamente.";
 
@@ -62,21 +79,32 @@ class DatabaseService implements IDatabaseService {
         errorMessage = error.message;
       }
 
-      throw new Error(errorMessage);
+      return new Error(errorMessage);
     }
   }
 
-  async createUser(userData: UserData): Promise<void | string> {
+  async createUser(userData: UserData): Promise<void | Error> {
     try {
-      if (await this.checkUserExists(userData.id)) throw new Error("O usuário já existe.");
+      const userExistsResult = await this.checkUserExists(userData.id);
+
+      if (userExistsResult instanceof Error) return userExistsResult;
+
+      if (userExistsResult) return new Error("O usuário já existe.");
 
       await setDoc(doc(firestore, "users", userData.id), userData);
+      return;
     } catch (error: unknown) {
+      let errorMessage = "Erro ao criar usuário no Firestore.";
+
       if (error instanceof FirebaseError) {
-        return "Erro ao criar usuário no Firestore";
+        errorMessage =
+          FirebaseAuthErrorMessages[error.code as keyof typeof FirebaseAuthErrorMessages] ||
+          errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
       }
 
-      return "Erro inesperado ao criar um novo usuário";
+      return new Error(errorMessage);
     }
   }
 }
