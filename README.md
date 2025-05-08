@@ -29,7 +29,7 @@ Veja como será o MVP do projeto no [figma](https://www.figma.com/design/6C40AEQ
 ### 🚀 Features que vão ser implementadas
 - Buscador eficiente utilizando a API Algolia
 - Favoritar receitas
-- Criar receitas com título, imagem e descrição.
+- Criar receitas com título, imagem e descrição que serão exibidas por relevância através de algoritmos de recomendação
 - Perfil com as receitas e links do usuário que pode ser acessado por outras pessoas como no instagram
 
 ### 🤝 CONTRIBUIÇÃO
