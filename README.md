@@ -30,7 +30,7 @@ Veja como será o MVP do projeto no [figma](https://www.figma.com/design/6C40AEQ
 - Buscador eficiente utilizando a API Algolia
 - Favoritar receitas
 - Criar receitas com título, imagem e descrição.
-- Perfil com as receitas e links do usuário que pode ser acessar por outras pessoas como no instagram
+- Perfil com as receitas e links do usuário que pode ser acessado por outras pessoas como no instagram
 
 ### 🤝 CONTRIBUIÇÃO
 Veja como contribuir com o projeto 👉 [TasteIt - Documentation](https://github.com/Luizboaventura1/TasteIt/wiki/Overview)
