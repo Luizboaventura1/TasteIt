@@ -25,3 +25,6 @@ Veja como será o MVP do projeto no [figma](https://www.figma.com/design/6C40AEQ
 * [Tailwind CSS](https://tailwindcss.com/)
 * [TypeScript](https://www.typescriptlang.org/)
 * [Vitest](https://vitest.dev/)
+
+### 🤝 CONTRIBUIÇÃO
+Veja como contribuir com o projeto 👉 [TasteIt - Documentation](https://github.com/Luizboaventura1/TasteIt/wiki/Overview)
