@@ -28,7 +28,7 @@ class AuthService implements IAuthService {
         errorMessage = `Erro inesperado: ${error.message}`;
       }
 
-      return new Error(errorMessage);
+      throw new Error(errorMessage);
     }
   }
 
@@ -37,9 +37,10 @@ class AuthService implements IAuthService {
       await auth.signOut();
     } catch (error: Error | unknown) {
       if (error instanceof Error) {
-        return new Error(error.message);
+        throw new Error(error.message);
       }
-      return new Error("Erro inesperado ao fazer signOut. Por favor, tente novamente.");
+
+      throw new Error("Erro inesperado ao fazer signOut. Por favor, tente novamente.");
     }
   }
 
@@ -47,7 +48,7 @@ class AuthService implements IAuthService {
     const user = auth.currentUser;
 
     if (!user) {
-      return new Error("Usuário não autenticado. Por favor, faça login novamente.");
+      throw new Error("Usuário não autenticado. Por favor, faça login novamente.");
     }
 
     return user.uid;
@@ -57,7 +58,7 @@ class AuthService implements IAuthService {
     const user = auth.currentUser;
 
     if (!user) {
-      return new Error("Usuário não autenticado. Por favor, faça login novamente.");
+      throw new Error("Usuário não autenticado. Por favor, faça login novamente.");
     }
 
     return user;

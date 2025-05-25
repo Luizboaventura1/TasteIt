@@ -29,11 +29,11 @@ class RecipeService implements IRecipeService {
       const userGoogleData = await this.authService.getUserData();
 
       if (!userGoogleData || userGoogleData instanceof Error) {
-        return new Error("Usuário não autenticado. Faça login novamente.");
+        throw new Error("Usuário não autenticado. Faça login novamente.");
       }
 
       if (!image) {
-        return new Error("Selecione uma imagem para a receita.");
+        throw new Error("Selecione uma imagem para a receita.");
       }
 
       const userName = (userGoogleData as User)?.displayName || "";
@@ -61,7 +61,7 @@ class RecipeService implements IRecipeService {
         errorMessage = error.message;
       }
 
-      return new Error(errorMessage);
+      throw new Error(errorMessage);
     }
   }
 
@@ -72,13 +72,15 @@ class RecipeService implements IRecipeService {
 
       const imageRef = ref(storage, `recipesImages/${recipeId}`);
       await deleteObject(imageRef);
+
       return;
     } catch (error: Error | unknown) {
       let errorMessage = "Erro inesperado ao deletar receita.";
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      return new Error(errorMessage);
+
+      throw new Error(errorMessage);
     }
   }
 
@@ -107,7 +109,8 @@ class RecipeService implements IRecipeService {
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      return new Error(errorMessage);
+
+      throw new Error(errorMessage);
     }
   }
 
@@ -121,13 +124,16 @@ class RecipeService implements IRecipeService {
       }
 
       const recipeData = docSnap.data() as Recipe;
+
       return recipeData;
     } catch (error: Error | unknown) {
       let errorMessage = "Erro inesperado ao buscar receita.";
+
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      return new Error(errorMessage);
+
+      throw new Error(errorMessage);
     }
   }
 
@@ -145,12 +151,12 @@ class RecipeService implements IRecipeService {
       return recipes;
     } catch (error: Error | unknown) {
       let errorMessage = "Erro inesperado ao listar receitas.";
-      
+
       if (error instanceof Error) {
         errorMessage = error.message;
       }
 
-      return new Error(errorMessage);
+      throw new Error(errorMessage);
     }
   }
 }
