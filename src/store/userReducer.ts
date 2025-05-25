@@ -3,6 +3,9 @@ import AuthService from "@/services/authService";
 import DatabaseService from "@/services/databaseService";
 import UserData from "@/interfaces/UserData";
 
+const authService = new AuthService();
+const databaseService = new DatabaseService();
+
 export type UserState = {
   user: UserData | null;
   loading: boolean;
@@ -19,9 +22,6 @@ export const loginWithGoogle = createAsyncThunk<UserData, void, { rejectValue: s
   "user/loginWithGoogle",
   async (_, thunkAPI) => {
     try {
-      const authService = new AuthService();
-      const databaseService = new DatabaseService();
-
       const googleUserData = await authService.loginWithGoogle();
 
       if (googleUserData instanceof Error) {
@@ -72,6 +72,18 @@ export const loginWithGoogle = createAsyncThunk<UserData, void, { rejectValue: s
   }
 );
 
+export const signOut = createAsyncThunk<void, void, { rejectValue: string }>(
+  "user/signOut",
+  async (_, thunkAPI) => {
+    try {
+      await authService.signOut();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Um erro inesperado ocorreu.";
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: "user",
   initialState,
@@ -90,6 +102,18 @@ const userSlice = createSlice({
         state.user = null;
         state.loading = false;
         state.error = action.payload ?? "Erro ao fazer login";
+      })
+      .addCase(signOut.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(signOut.fulfilled, (state) => {
+        state.user = null;
+        state.loading = false;
+      })
+      .addCase(signOut.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload ?? "Erro ao fazer logout";
       });
   },
 });
