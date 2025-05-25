@@ -23,14 +23,14 @@ class DatabaseService implements IDatabaseService {
         errorMessage = error.message;
       }
 
-      return new Error(errorMessage);
+      throw new Error(errorMessage);
     }
   }
 
   async getUserData(id: string): Promise<UserData | Error> {
     try {
       if (!id) {
-        return new Error("id do usuário inválido");
+        throw new Error("id do usuário inválido");
       }
 
       const userDocRef = doc(firestore, "users", id);
@@ -41,7 +41,7 @@ class DatabaseService implements IDatabaseService {
         return userData;
       }
 
-      return new Error("Usuário não encontrado");
+      throw new Error("Usuário não encontrado");
     } catch (error: Error | unknown) {
       let errorMessage = "Erro inesperado ao obter os dados do usuário.";
 
@@ -53,7 +53,7 @@ class DatabaseService implements IDatabaseService {
         errorMessage = error.message;
       }
 
-      return new Error(errorMessage);
+      throw new Error(errorMessage);
     }
   }
 
@@ -62,7 +62,7 @@ class DatabaseService implements IDatabaseService {
       const userExistsResult = await this.checkUserExists(userData.id);
 
       if (userExistsResult instanceof Error) return userExistsResult;
-      if (!userExistsResult) return new Error("Id do usuário inválido.");
+      if (!userExistsResult) throw new Error("Id do usuário inválido.");
 
       const userDocRef = doc(firestore, "users", userData.id);
 
@@ -79,7 +79,7 @@ class DatabaseService implements IDatabaseService {
         errorMessage = error.message;
       }
 
-      return new Error(errorMessage);
+      throw new Error(errorMessage);
     }
   }
 
@@ -88,10 +88,10 @@ class DatabaseService implements IDatabaseService {
       const userExistsResult = await this.checkUserExists(userData.id);
 
       if (userExistsResult instanceof Error) return userExistsResult;
-
-      if (userExistsResult) return new Error("O usuário já existe.");
+      if (userExistsResult) throw new Error("O usuário já existe.");
 
       await setDoc(doc(firestore, "users", userData.id), userData);
+
       return;
     } catch (error: unknown) {
       let errorMessage = "Erro ao criar usuário no Firestore.";
@@ -104,7 +104,7 @@ class DatabaseService implements IDatabaseService {
         errorMessage = error.message;
       }
 
-      return new Error(errorMessage);
+      throw new Error(errorMessage);
     }
   }
 }

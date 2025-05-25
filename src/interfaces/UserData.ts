@@ -2,11 +2,11 @@ import Recipe from "./Recipe";
 
 interface UserData {
   id: string;
-  email: string;
+  email: string | null;
   name: string | null;
   photoURL: string | null;
-  instagramLink: string;
-  favoriteRecipes: Recipe[];
+  instagramLink: string | null;
+  favoriteRecipes: Recipe[] | null;
 }
 
 export default UserData;
