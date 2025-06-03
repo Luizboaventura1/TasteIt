@@ -27,10 +27,10 @@ Veja como será o MVP do projeto no [figma](https://www.figma.com/design/6C40AEQ
 * [Vitest](https://vitest.dev/)
 
 ### 🚀 Features que vão ser implementadas
-- Buscador eficiente utilizando a API Algolia
-- Favoritar receitas
-- Criar receitas com título, imagem e descrição que serão exibidas por relevância através de algoritmos de recomendação
-- Perfil com as receitas e links do usuário que pode ser acessado por outras pessoas como no instagram
+- Busca eficiente utilizando a API da Algolia
+- Possibilidade de favoritar receitas
+- Criação de receitas com título, imagem e descrição, exibidas por relevância com base em algoritmos de recomendação
+- Perfil público com receitas e links do usuário, acessível por outras pessoas, similar ao Instagram
 
 ### 🤝 CONTRIBUIÇÃO
 Veja como contribuir com o projeto 👉 [TasteIt - Documentation](https://github.com/Luizboaventura1/TasteIt/wiki/Overview)
