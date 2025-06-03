@@ -1,4 +1,4 @@
-import { FirebaseAuthErrorMessages } from "../constants/firebaseErrorMessages"
+import { FirebaseAuthErrorMessages } from "../constants/firebaseErrorMessages";
 import { FirebaseError } from "firebase/app";
 import { GoogleAuthProvider, signInWithPopup, User } from "firebase/auth";
 import { auth } from "../lib/firebase/firebase.config";
@@ -7,7 +7,7 @@ import IAuthService from "@/interfaces/IAuthService";
 class AuthService implements IAuthService {
   private provider = new GoogleAuthProvider();
 
-  async loginWithGoogle(): Promise<User | Error> {
+  async loginWithGoogle(): Promise<User> {
     try {
       const result = await signInWithPopup(auth, this.provider);
       const user = result.user;
@@ -32,7 +32,7 @@ class AuthService implements IAuthService {
     }
   }
 
-  async signOut(): Promise<void | Error> {
+  async signOut(): Promise<void> {
     try {
       await auth.signOut();
     } catch (error: Error | unknown) {
@@ -44,7 +44,7 @@ class AuthService implements IAuthService {
     }
   }
 
-  getUserId(): string | Error {
+  getUserId(): string {
     const user = auth.currentUser;
 
     if (!user) {
@@ -54,7 +54,7 @@ class AuthService implements IAuthService {
     return user.uid;
   }
 
-  getUserData(): User | Error {
+  getCurrentUser(): User {
     const user = auth.currentUser;
 
     if (!user) {

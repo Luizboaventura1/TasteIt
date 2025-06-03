@@ -6,7 +6,7 @@ import UserData from "@/interfaces/UserData";
 import IDatabaseService from "@/interfaces/IDatabaseService";
 
 class DatabaseService implements IDatabaseService {
-  async checkUserExists(userId: string): Promise<boolean | Error> {
+  async checkUserExists(userId: string): Promise<boolean> {
     try {
       const userDocRef = doc(firestore, "users", userId);
       const userSnapshot = await getDoc(userDocRef);
@@ -27,7 +27,7 @@ class DatabaseService implements IDatabaseService {
     }
   }
 
-  async getUserData(id: string): Promise<UserData | Error> {
+  async getUserData(id: string): Promise<UserData> {
     try {
       if (!id) {
         throw new Error("id do usuário inválido");
@@ -57,11 +57,10 @@ class DatabaseService implements IDatabaseService {
     }
   }
 
-  async updateUserData(userData: UserData): Promise<void | Error> {
+  async updateUserData(userData: UserData): Promise<void> {
     try {
       const userExistsResult = await this.checkUserExists(userData.id);
 
-      if (userExistsResult instanceof Error) return userExistsResult;
       if (!userExistsResult) throw new Error("Id do usuário inválido.");
 
       const userDocRef = doc(firestore, "users", userData.id);
@@ -83,16 +82,13 @@ class DatabaseService implements IDatabaseService {
     }
   }
 
-  async createUser(userData: UserData): Promise<void | Error> {
+  async createUser(userData: UserData): Promise<void> {
     try {
       const userExistsResult = await this.checkUserExists(userData.id);
 
-      if (userExistsResult instanceof Error) return userExistsResult;
       if (userExistsResult) throw new Error("O usuário já existe.");
 
       await setDoc(doc(firestore, "users", userData.id), userData);
-
-      return;
     } catch (error: unknown) {
       let errorMessage = "Erro ao criar usuário no Firestore.";
 

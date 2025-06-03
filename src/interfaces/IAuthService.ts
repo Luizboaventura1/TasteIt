@@ -1,10 +1,10 @@
 import { User } from "firebase/auth";
 
 interface IAuthService {
-  loginWithGoogle(): Promise<User | Error>;
-  signOut(): Promise<void | Error>;
-  getUserId(): string | Error;
-  getUserData(): User | Error;
+  loginWithGoogle(): Promise<User>;
+  signOut(): Promise<void>;
+  getUserId(): string;
+  getCurrentUser(): User;
 }
 
 export default IAuthService;
