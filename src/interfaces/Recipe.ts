@@ -8,7 +8,7 @@ interface Recipe {
 	title: string,
 	description: string,
 	category: RecipeCategory,
-	createAt: Date
+	createdAt: Date | string
 }
 
 export default Recipe

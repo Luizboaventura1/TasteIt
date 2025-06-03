@@ -21,12 +21,12 @@ class RecipeService implements IRecipeService {
   async addRecipe(
     recipe: Pick<Recipe, "title" | "description" | "category">,
     image: File | null
-  ): Promise<void | Error> {
+  ): Promise<Recipe> {
     const newRecipeRef = doc(collection(firestore, "recipes"));
     const storageRef = ref(storage, `recipesImages/${newRecipeRef.id}`);
 
     try {
-      const userGoogleData = await this.authService.getUserData();
+      const userGoogleData = this.authService.getCurrentUser();
 
       if (!userGoogleData || userGoogleData instanceof Error) {
         throw new Error("Usuário não autenticado. Faça login novamente.");
@@ -49,11 +49,12 @@ class RecipeService implements IRecipeService {
         title: recipe.title,
         description: recipe.description,
         category: recipe.category,
-        createAt: new Date(),
+        createdAt: new Date(),
       };
 
       await setDoc(newRecipeRef, recipeData);
-      return;
+
+      return recipeData;
     } catch (error: Error | unknown) {
       let errorMessage = "Erro inesperado ao adicionar receita. Por favor, tente novamente.";
 
@@ -65,7 +66,7 @@ class RecipeService implements IRecipeService {
     }
   }
 
-  async deleteRecipe(recipeId: string): Promise<void | Error> {
+  async deleteRecipe(recipeId: string): Promise<void> {
     try {
       const recipeRef = doc(firestore, "recipes", recipeId);
       await deleteDoc(recipeRef);
@@ -84,7 +85,7 @@ class RecipeService implements IRecipeService {
     }
   }
 
-  async updateRecipe(recipeId: string, recipe: Recipe): Promise<Recipe | Error> {
+  async updateRecipe(recipeId: string, recipe: Recipe): Promise<Recipe> {
     try {
       const recipeRef = doc(firestore, "recipes", recipeId);
 
@@ -94,7 +95,7 @@ class RecipeService implements IRecipeService {
         imageUrl: recipe.imageUrl,
         author: recipe.author,
         userId: recipe.userId,
-        createAt: recipe.createAt,
+        createdAt: recipe.createdAt,
         category: recipe.category,
       };
 
@@ -114,13 +115,13 @@ class RecipeService implements IRecipeService {
     }
   }
 
-  async getRecipeById(recipeId: string): Promise<Recipe | Error> {
+  async getRecipeById(recipeId: string): Promise<Recipe> {
     try {
       const recipeRef = doc(firestore, "recipes", recipeId);
       const docSnap = await getDoc(recipeRef);
 
       if (!docSnap.exists()) {
-        return new Error("Receita não encontrada.");
+        throw new Error("Receita não encontrada.");
       }
 
       const recipeData = docSnap.data() as Recipe;
@@ -137,7 +138,7 @@ class RecipeService implements IRecipeService {
     }
   }
 
-  async getAllRecipes(): Promise<Recipe[] | Error> {
+  async getAllRecipes(): Promise<Recipe[]> {
     try {
       const recipesRef = collection(firestore, "recipes");
       const q = query(recipesRef);

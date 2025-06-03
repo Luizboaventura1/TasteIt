@@ -1,18 +1,15 @@
 import Recipe from "./Recipe";
 
 interface IRecipeService {
-  addRecipe(
-    recipe: Pick<Recipe, "title" | "description">,
-    image: File | null
-  ): Promise<void | Error>;
+  addRecipe(recipe: Pick<Recipe, "title" | "description">, image: File | null): Promise<Recipe>;
 
-  deleteRecipe(recipeId: string): Promise<void | Error>;
+  deleteRecipe(recipeId: string): Promise<void>;
 
-  updateRecipe(recipeId: string, recipe: Recipe): Promise<Recipe | Error>;
+  updateRecipe(recipeId: string, recipe: Recipe): Promise<Recipe>;
 
-  getRecipeById(recipeId: string): Promise<Recipe | Error>;
+  getRecipeById(recipeId: string): Promise<Recipe>;
 
-  getAllRecipes(): Promise<Recipe[] | Error>;
+  getAllRecipes(): Promise<Recipe[]>;
 }
 
 export default IRecipeService;
