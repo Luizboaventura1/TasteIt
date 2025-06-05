@@ -7,6 +7,7 @@
 
 @theme {
   --color-primary: oklch(0.5844 0.2293 28.28);
+  --color-primary-dark: oklch(0.5442 0.222 28.28);
   --color-dark: oklch(0.2768 0 0);
   --color-light: oklch(0.9288 0 0);
   --color-muted: oklch(0.7122 0 0);
