@@ -1,3 +1,5 @@
+"use client";
+
 import GoogleImage from "@/assets/images/google-image.svg";
 import Image from "next/image";
 

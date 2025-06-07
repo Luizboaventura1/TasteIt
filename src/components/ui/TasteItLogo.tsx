@@ -1,3 +1,5 @@
+"use client";
+
 import TasteItLogoBlackTheme from "@/assets/images/tasteit-logo-black-theme.svg";
 import TasteItLogoWhiteTheme from "@/assets/images/tasteit-logo-white-theme.svg";
 import Image from "next/image";
