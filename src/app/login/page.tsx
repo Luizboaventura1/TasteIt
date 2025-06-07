@@ -1,3 +1,5 @@
+"use client"
+
 import LooginFooter from "@/components/layouts/LoginFooter";
 import GoogleLoginButton from "@/components/ui/GoogleLoginButton";
 import TasteItLogo from "@/components/ui/TasteItLogo";

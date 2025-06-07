@@ -1,3 +1,5 @@
+"use client";
+
 import { ReactNode, ButtonHTMLAttributes } from "react";
 
 type Sizes = "sm" | "md" | "lg";
