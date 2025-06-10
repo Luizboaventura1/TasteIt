@@ -92,7 +92,7 @@ export default function SearchEngine() {
   }, []);
 
   return (
-    <div ref={wrapperRef} className="relative max-w-md w-full mx-auto mt-10">
+    <div ref={wrapperRef} className="relative max-w-lg w-full mx-auto">
       <SearchBar
         value={query}
         onFocus={() => setIsOpen(true)}

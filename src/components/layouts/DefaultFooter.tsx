@@ -10,7 +10,7 @@ export default function DefaultFooter() {
       <footer className="flex items-center border-t border-muted w-full bg-light py-4 md:py-0">
         <div className="block md:flex items-center justify-between space-y-4 md:space-y-0 container mx-auto px-4">
           <div className="flex justify-between">
-            <TasteItLogo theme="light" size={60} />
+            <TasteItLogo size={60} />
             <div className="flex items-center md:hidden">
               <GitHubLink />
             </div>

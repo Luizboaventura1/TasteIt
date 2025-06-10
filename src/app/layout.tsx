@@ -1,6 +1,7 @@
 import "../globals.css";
 import { ReactNode } from "react";
 import ClientLayout from "@/components/features/ClientLayout";
+import LayoutWrapper from "@/components/layouts/LayoutWrapper";
 
 export const metadata = {
   title: "TasteIt",
@@ -10,8 +11,10 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body>
-        <ClientLayout>{children}</ClientLayout>
+      <body className="bg-light">
+        <ClientLayout>
+          <LayoutWrapper>{children}</LayoutWrapper>
+        </ClientLayout>
       </body>
     </html>
   );

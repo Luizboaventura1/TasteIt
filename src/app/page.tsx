@@ -1,11 +1,10 @@
-import SearchEngine from "@/components/features/SearchEngine"
+import DefaultFooter from "@/components/layouts/DefaultFooter";
 
-export default function Home() {
+export default function Home({ children }: { children: React.ReactNode }) {
   return (
-    <div className="h-screen flex justify-center items-center bg-light">
-      <div className="w-full max-w-md">
-        <SearchEngine />
-      </div>
+    <div className="bg-light">
+      <main className="h-[900px]">{children}</main>
+      <DefaultFooter />
     </div>
   );
 }
