@@ -11,7 +11,7 @@ export default function Login() {
       <nav className="h-[80px] flex items-center">
         <div className="container mx-auto">
           <Link href="/">
-            <TasteItLogo theme="white" size={60} />
+            <TasteItLogo size={60} />
           </Link>
         </div>
       </nav>
