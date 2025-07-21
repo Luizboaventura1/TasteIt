@@ -86,7 +86,7 @@ export default function AccountUserModal() {
       >
         {userData.photoURL ? (
           <Image
-            className="w-8 h-8"
+            className="w-8 h-8 rounded-full"
             src={userData.photoURL}
             alt="User image"
             width={60}
