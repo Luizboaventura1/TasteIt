@@ -9,6 +9,8 @@ interface IRecipeService {
 
   getRecipeById(recipeId: string): Promise<Recipe>;
 
+  getAllUserRecipes(userId: string): Promise<Recipe[]>;
+
   getAllRecipes(): Promise<Recipe[]>;
 }
 

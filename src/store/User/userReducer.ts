@@ -1,8 +1,8 @@
-import UserState from "./types/UserState";
-import { handleLoginWithGoogleCases } from "./thunks/loginWithGoogle";
-import { handleAddRecipeCases } from "./thunks/addRecipe";
-import { handleSignOutCases } from "./thunks/signOut";
 import { createSlice } from "@reduxjs/toolkit";
+import { handleAddRecipeCases } from "./thunks/addRecipe";
+import { handleLoginWithGoogleCases } from "./thunks/loginWithGoogle";
+import { handleSignOutCases } from "./thunks/signOut";
+import UserState from "./types/UserState";
 
 const initialState: UserState = {
   user: null,

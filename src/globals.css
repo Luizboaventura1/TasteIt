@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 * {
   font-family: "Poppins", sans-serif;
@@ -13,4 +14,44 @@
   --color-light-gray: oklch(0.9198 0 0);
   --color-muted: oklch(0.7122 0 0);
   --color-muted-dark: oklch(0.6599 0 0);
+}
+
+.prose h1 {
+  @apply text-2xl text-dark font-bold mt-2 mb-1;
+}
+
+.prose h2 {
+  @apply text-xl text-dark font-semibold mt-2 mb-1;
+}
+
+.prose h3 {
+  @apply text-lg text-dark font-medium mt-1 mb-1;
+}
+
+.ProseMirror {
+  color: var(--color-dark);
+}
+
+.ProseMirror:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.ProseMirror p.is-empty::before {
+  color: #5b5b5b;
+  opacity: 0.7;
+  content: attr(data-placeholder);
+  float: left;
+  pointer-events: none;
+  height: 0;
+}
+
+.ProseMirror ul li::marker,
+.ProseMirror ol li::marker {
+  color: var(--color-dark);
+}
+
+.no-scroll {
+  overflow: hidden;
 }

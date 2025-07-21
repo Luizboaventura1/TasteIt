@@ -10,7 +10,7 @@ const recipeService = new RecipeService(authService);
 
 export const addRecipe = createAsyncThunk<
   Recipe,
-  { data: Pick<Recipe, "title" | "description" | "category">; imageFile: File | null },
+  { data: Pick<Recipe, "title" | "description" | "category">, imageFile: File | null },
   ThunkRejectPayload
 >("user/addRecipe", async ({ data, imageFile }, thunkAPI) => {
   try {

@@ -12,6 +12,7 @@ import {
   query,
   setDoc,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
@@ -129,6 +130,30 @@ class RecipeService implements IRecipeService {
       return recipeData;
     } catch (error: Error | unknown) {
       let errorMessage = "Erro inesperado ao buscar receita.";
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      throw new Error(errorMessage);
+    }
+  }
+
+  async getAllUserRecipes(userId: string): Promise<Recipe[]> {
+    try {
+      const recipesRef = collection(firestore, "recipes");
+
+      const q = query(recipesRef, where("userId", "==", userId));
+      const querySnapshot = await getDocs(q);
+
+      const userRecipes: Recipe[] = [];
+      querySnapshot.forEach((doc) => {
+        userRecipes.push(doc.data() as Recipe);
+      });
+
+      return userRecipes;
+    } catch (error: Error | unknown) {
+      let errorMessage = "Erro inesperado ao listar receitas do usuário.";
 
       if (error instanceof Error) {
         errorMessage = error.message;
