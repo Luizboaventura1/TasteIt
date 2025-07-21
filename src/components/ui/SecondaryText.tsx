@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 interface SecondaryTextProps {
   children: ReactNode;
   size?: "sm" | "md" | "lg" | "xl";
-  className: string;
+  className?: string;
 }
 
 const sizeText = {

@@ -14,6 +14,8 @@ const sizeText = {
   xl: "text-2xl",
 };
 
+const style = "text-dark font-medium"
+
 export default function PrimaryText({ children, size = "md", className }: PrimaryTextProps) {
-  return <h1 className={clsx(sizeText[size], "text-dark font-medium", className)}>{children}</h1>;
+  return <h1 className={clsx(sizeText[size], style, className)}>{children}</h1>;
 }

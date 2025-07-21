@@ -23,7 +23,7 @@ export const loginWithGoogle = createAsyncThunk<UserData, void, ThunkRejectPaylo
       const userExists = await databaseService.checkUserExists(uid);
 
       if (userExists) {
-        const existingUser = await databaseService.getUserData(uid);
+        const existingUser = await databaseService.getUserDataById(uid);
         return existingUser;
       }
 

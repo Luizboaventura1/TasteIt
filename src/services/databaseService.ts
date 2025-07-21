@@ -27,7 +27,7 @@ class DatabaseService implements IDatabaseService {
     }
   }
 
-  async getUserData(id: string): Promise<UserData> {
+  async getUserDataById(id: string): Promise<UserData> {
     try {
       if (!id) {
         throw new Error("id do usuário inválido");
