@@ -1,57 +1,46 @@
+"use client";
+
+import BackButton from "@/components/ui/BackButton";
 import PrimaryText from "@/components/ui/PrimaryText";
 import SecondaryText from "@/components/ui/SecondaryText";
+import AuthService from "@/services/authService";
+import RecipeService from "@/services/recipeService";
 import Image from "next/image";
+import { useParams } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Recipe() {
+  const params = useParams();
+  const recipeId = Array.isArray(params.slug) ? params.slug[0] : params.slug;
+  const authService = new AuthService();
+  const recipeService = new RecipeService(authService);
+
   return (
-    <div className="container mx-auto px-4">
-      <nav className="flex justify-between gap-4 mt-24">
-        <section className="flex gap-4">
+    <div className="container mx-auto px-4 min-h-screen">
+      <nav className="flex flex-col-reverse md:flex-row justify-between gap-4 mt-24">
+        <section className="flex flex-col items-center md:items-start md:flex-row gap-4 text-center md:text-start">
           <Image
-            className="w-36 h-36 rounded-2xl"
+            className="w-36 h-36 rounded-2xl mx-auto md:mx-0"
             src="https://images.pexels.com/photos/1055272/pexels-photo-1055272.jpeg"
             alt="Img"
             width={200}
             height={200}
           />
-          <div className="grid grid-rows-[auto,1fr] max-w-lg">
-            <header>
-              <PrimaryText size="lg">Cupcake com cereja</PrimaryText>
-              <SecondaryText size="sm" className="mt-2">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolores unde, similique
-                molestias quo perferendis quod?
-              </SecondaryText>
-            </header>
+          <div className="max-w-lg">
+            <PrimaryText size="lg">Cupcake com cereja</PrimaryText>
 
-            <footer className="flex items-end justify-between gap-2">
-              <cite className="text-sm text-dark/80">Feito por Luiz Henrique</cite>
-              <span>+</span>
-            </footer>
+            <cite className="text-sm text-dark/80">Feito por Luiz Henrique</cite>
           </div>
         </section>
 
-        <section className="text-end">Voltar</section>
+        <section className="flex justify-end items-start">
+          <BackButton>Voltar</BackButton>
+        </section>
       </nav>
 
       <section className="flex justify-between items-center mt-20 mb-12">
         <PrimaryText size="lg">Descrição da receita</PrimaryText>
         <button>Editar</button>
-      </section>
-
-      <section>
-        <PrimaryText>Ingredientes</PrimaryText>
-        <SecondaryText className="py-6">
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Beatae, earum consequatur velit
-          quis suscipit dignissimos cum eligendi id reiciendis nulla fugit sed. Temporibus dolorum
-          corporis deserunt exercitationem doloremque illo. Repudiandae?
-        </SecondaryText>
-
-        <PrimaryText>Modo de preparo</PrimaryText>
-        <SecondaryText className="py-6">
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Beatae, earum consequatur velit
-          quis suscipit dignissimos cum eligendi id reiciendis nulla fugit sed. Temporibus dolorum
-          corporis deserunt exercitationem doloremque illo. Repudiandae?
-        </SecondaryText>
       </section>
     </div>
   );
