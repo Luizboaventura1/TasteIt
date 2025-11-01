@@ -135,20 +135,20 @@ export default function AddRecipeModal({ isOpen, closeModal }: AddRecipeModalPro
           </button>
         </nav>
 
-        <header className="grid gap-4 grid-cols-1 sm:grid-cols-[1fr_auto] w-full mb-5">
+        <header className="grid gap-4 grid-cols-1 sm:grid-cols-[auto_1fr] w-full mb-5">
           <div className="flex justify-center sm:justify-start">
             {displayImage ? (
-              <div className="w-36 h-36">
+              <div className="w-[250px] h-[167px]">
                 <Image
                   src={displayImage}
                   alt="Pré-visualização"
                   className="object-cover w-full h-full rounded-xl"
-                  width={300}
-                  height={300}
+                  width={250}
+                  height={150}
                 />
               </div>
             ) : (
-              <div className="flex justify-center items-center w-36 h-36 rounded-xl border border-muted p-3">
+              <div className="flex justify-center items-center w-[250px] h-[167px] rounded-xl border border-muted p-3">
                 <p className="font-medium text-dark/80 text-nowrap">Sem imagem</p>
               </div>
             )}
@@ -157,7 +157,7 @@ export default function AddRecipeModal({ isOpen, closeModal }: AddRecipeModalPro
           <div className="w-full">
             <PrimaryText size="sm">Escolha uma imagem para a receita</PrimaryText>
             <SecondaryText size="sm">
-              Coloque uma imagem, assim, terá mais chances das pessoas verem sua receita
+              Dimensões recomendadas: <span className="font-medium">600x400 px</span>
             </SecondaryText>
             <Controller
               control={control}
