@@ -40,7 +40,7 @@ export default function RecipeFormModal({
   initialData,
 }: RecipeFormModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [displayImage, setDisplayImage] = useState<string | null>(null); // To show a preview of the selected image
+  const [displayImage, setDisplayImage] = useState<string | null>(initialData?.imageUrl ?? null); // To show a preview of the selected image
   const [isLoading, setIsLoading] = useState(false);
 
   const recipeService = new RecipeService(new AuthService());
@@ -283,7 +283,7 @@ export default function RecipeFormModal({
             Cancelar
           </button>
           <PrimaryButton onClick={handleSubmit(handleRecipeData)} size="sm">
-            {mode === "edit" ? "Salvar alterações" : "Criar receita"}
+            {mode === "edit" ? "Salvar alterações" : "Enviar receita"}
           </PrimaryButton>
         </footer>
       </main>

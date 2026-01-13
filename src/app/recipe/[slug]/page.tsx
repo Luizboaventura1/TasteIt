@@ -1,40 +1,50 @@
 "use client";
 
+import RecipeFormModal from "@/components/features/RecipeFormModal";
 import EditIcon from "@/components/icons/EditIcon";
 import BackButton from "@/components/ui/BackButton";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import PrimaryText from "@/components/ui/PrimaryText";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import Skeleton from "@/components/ui/Skeleton";
-import type Recipe from "@/interfaces/Recipe";
+import QUERY_KEYS from "@/constants/queryKeys";
+import useModal from "@/hooks/useModal";
 import AuthService from "@/services/authService";
 import RecipeService from "@/services/recipeService";
-import { RootState } from "@/store";
+import { useQuery } from "@tanstack/react-query";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 
 export default function Recipe() {
   const params = useParams();
   const recipeId = Array.isArray(params.slug) ? params.slug[0] : params.slug;
   const authService = new AuthService();
   const recipeService = new RecipeService(authService);
-  const user = useSelector((state: RootState) => state.user)?.user || null;
-  const [currentRecipe, setCurrentRecipe] = useState<Recipe | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const addRecipeModal = useModal();
 
   useEffect(() => {
-    const getRecipe = async () => {
-      const recipe = await recipeService.getRecipeById(recipeId as string);
-      setCurrentRecipe(recipe);
-    };
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUserId(user ? user.uid : null);
+    });
 
-    getRecipe();
+    return () => unsubscribe();
   }, []);
 
-  if(!currentRecipe) {
-    return <div>receita não encontrada</div>
+  const { data } = useQuery({
+    queryKey: [QUERY_KEYS.RECIPE(recipeId!)],
+    queryFn: async () => {
+      return await recipeService.getRecipeById(recipeId!);
+    },
+    enabled: !!recipeId,
+  });
+
+  if (!data) {
+    return <div>receita não encontrada</div>;
   }
 
   return (
@@ -44,10 +54,10 @@ export default function Recipe() {
           <PrimaryText size="lg">Cupcake com cereja</PrimaryText>
 
           <div className="max-w-[600px] w-full aspect-[3/2] mx-auto overflow-hidden rounded-2xl">
-            {currentRecipe ? (
+            {data ? (
               <Image
                 className="object-cover w-full h-full"
-                src={currentRecipe.imageUrl}
+                src={data.imageUrl}
                 alt="Img"
                 width={600}
                 height={400}
@@ -57,11 +67,9 @@ export default function Recipe() {
             )}
           </div>
 
-          {currentRecipe ? (
+          {data ? (
             <cite className="text-sm text-dark/80 hover:text-dark border-b-2 border-transparent hover:border-dark">
-              <Link href={`/profile/${currentRecipe?.userId}`}>
-                Feito por {currentRecipe?.author}
-              </Link>
+              <Link href={`/profile/${data?.userId}`}>Feito por {data?.author}</Link>
             </cite>
           ) : (
             <Skeleton className="h-5 w-36" />
@@ -75,21 +83,28 @@ export default function Recipe() {
 
       <section className="flex justify-between items-center mt-20 mb-12">
         <PrimaryText size="lg">Descrição da receita</PrimaryText>
-        {currentRecipe && user?.id === currentRecipe?.userId && (
-          <PrimaryButton size="sm">
+        {data && userId === data?.userId && (
+          <PrimaryButton onClick={addRecipeModal.open} size="sm">
             <EditIcon /> Editar
           </PrimaryButton>
         )}
       </section>
 
-      {currentRecipe ? (
-        <RichTextEditor showToolbar={false} content={currentRecipe.description} editable={false} />
+      {data ? (
+        <RichTextEditor showToolbar={false} content={data.description} editable={false} />
       ) : (
         <div className="space-y-2">
           <Skeleton className="h-5 w-1/2" />
           <Skeleton className="h-5 w-1/3" />
         </div>
       )}
+
+      <RecipeFormModal
+        initialData={data}
+        isOpen={addRecipeModal.isOpen}
+        closeModal={addRecipeModal.close}
+        mode="edit"
+      />
     </div>
   );
 }
