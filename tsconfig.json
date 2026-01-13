@@ -22,6 +22,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/login/page.tsx", "src/app/layout.tsx", "src/components/ui/EventOptionsModal/index.sx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/login/page.tsx", "src/app/layout.tsx", "src/components/ui/EventOptionsModal/index.sx", "src/components/features/RecipeFormModal"],
   "exclude": ["node_modules"]
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import UserIcon from "@/assets/images/user-icon.svg";
-import AddRecipeModal from "@/components/features/AddRecipeModal.tsx";
+import RecipeFormModal from "@/components/features/RecipeFormModal";
 import PlusIcon from "@/components/icons/PlusIcon";
 import DefaultFooter from "@/components/layouts/DefaultFooter";
 import BackButton from "@/components/ui/BackButton";
@@ -173,7 +173,11 @@ export default function Profile() {
 
       <DefaultFooter />
 
-      <AddRecipeModal closeModal={() => setShowAddRecipeModal(false)} isOpen={showAddRecipeModal} />
+      <RecipeFormModal
+        mode="create"
+        closeModal={() => setShowAddRecipeModal(false)}
+        isOpen={showAddRecipeModal}
+      />
     </>
   );
 }
