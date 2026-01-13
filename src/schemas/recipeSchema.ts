@@ -13,9 +13,19 @@ const recipeSchema = z.object({
     .trim(),
   category: z.string().min(1, "Selecione uma categoria para a receita."),
   imageFile: z
-    .instanceof(File, { message: "O arquivo da imagem deve ser um arquivo válido." })
-    .nullable()
-    .refine((file) => file !== null, "Por favor, selecione uma imagem para a receita."),
+    .union([
+      z.instanceof(File, { message: "O arquivo da imagem deve ser um arquivo válido." }),
+      z
+        .string()
+        .trim()
+        .refine((s) => /^https?:\/\//i.test(s), {
+          message: "Por favor, insira uma URL válida",
+        }),
+    ])
+    .refine(
+      (v) => v !== null && v !== undefined,
+      "Por favor, selecione uma imagem para a receita."
+    ),
 });
 
 export default recipeSchema;

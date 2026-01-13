@@ -2,25 +2,29 @@
 
 import Dropdown from "@/components/ui/Dropdown";
 import FormErrorMessage from "@/components/ui/FormErrorMessage";
+import Loading from "@/components/ui/Loading";
 import MinimalistInput from "@/components/ui/MinimalistInput";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import SecondaryText from "@/components/ui/SecondaryText";
 import RecipeCategory from "@/enums/RecipeCategory";
+import type Recipe from "@/interfaces/Recipe";
 import recipeSchema, { RecipeFormInputs } from "@/schemas/recipeSchema";
-import { AppDispatch } from "@/store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
 import CloseIcon from "../../icons/CloseIcon";
 import PrimaryText from "../../ui/PrimaryText";
-import { addRecipe } from "@/store/User/thunks/addRecipe";
-import Loading from "@/components/ui/Loading";
+import { QueryClient, useMutation } from "@tanstack/react-query";
+import RecipeService from "@/services/recipeService";
+import AuthService from "@/services/authService";
+import QUERY_KEYS from "@/constants/queryKeys";
 
-interface AddRecipeModalProps {
+interface RecipeFormModalProps {
   isOpen: boolean;
+  mode: "create" | "edit";
+  initialData?: Recipe;
   closeModal: () => void;
 }
 
@@ -29,39 +33,73 @@ const categoryOptions = Object.entries(RecipeCategory).map(([key, value]) => ({
   label: value,
 }));
 
-export default function AddRecipeModal({ isOpen, closeModal }: AddRecipeModalProps) {
+export default function RecipeFormModal({
+  isOpen,
+  closeModal,
+  mode,
+  initialData,
+}: RecipeFormModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [displayImage, setDisplayImage] = useState<string | null>(null);
+  const [displayImage, setDisplayImage] = useState<string | null>(null); // To show a preview of the selected image
   const [isLoading, setIsLoading] = useState(false);
 
-  const dispatch = useDispatch<AppDispatch>();
+  const recipeService = new RecipeService(new AuthService());
+  const queryClient = new QueryClient();
+
+  const createRecipeMutation = useMutation({
+    mutationFn: async (recipe: Recipe) => {
+      return await recipeService.addRecipe(
+        { title: recipe.title, description: recipe.description, category: recipe.category },
+        recipe.imageUrl as unknown as File
+      );
+    },
+  });
+
+  const editRecipeMutation = useMutation({
+    mutationFn: async (recipe: Recipe) => {
+      return await recipeService.updateRecipe(recipe.id, recipe);
+    },
+  });
 
   const { control, handleSubmit } = useForm<RecipeFormInputs>({
     resolver: zodResolver(recipeSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      category: "",
-      imageFile: null,
+      title: initialData?.title ?? "",
+      description: initialData?.description ?? "",
+      category: initialData?.category ?? "",
+      imageFile: initialData?.imageUrl ?? "",
     },
   });
 
-  const handleAddRecipe = async ({ title, description, category, imageFile }: RecipeFormInputs) => {
+  const handleRecipeData = async ({
+    title,
+    description,
+    category,
+    imageFile,
+  }: RecipeFormInputs) => {
     setIsLoading(true);
 
-    await dispatch(
-      addRecipe({
-        data: {
-          title: title,
-          description: description,
-          category: category as RecipeCategory,
-        },
-        imageFile: imageFile as File,
-      })
-    ).finally(() => {
-      closeModal();
+    const newRecipeData = {
+      title,
+      description,
+      category: category,
+      imageUrl: imageFile,
+    } as Recipe;
+
+    const onSuccess = () => {
       setIsLoading(false);
-    });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.USER_RECIPES] });
+      closeModal();
+    };
+
+    switch (mode) {
+      case "create":
+        createRecipeMutation.mutate(newRecipeData, { onSuccess });
+        break;
+      case "edit":
+        editRecipeMutation.mutate(newRecipeData, { onSuccess });
+        break;
+    }
   };
 
   const handleFileChange = (
@@ -244,8 +282,8 @@ export default function AddRecipeModal({ isOpen, closeModal }: AddRecipeModalPro
           >
             Cancelar
           </button>
-          <PrimaryButton onClick={handleSubmit(handleAddRecipe)} size="sm">
-            Adicionar
+          <PrimaryButton onClick={handleSubmit(handleRecipeData)} size="sm">
+            {mode === "edit" ? "Salvar alterações" : "Criar receita"}
           </PrimaryButton>
         </footer>
       </main>
