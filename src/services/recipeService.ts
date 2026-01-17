@@ -16,28 +16,57 @@ import {
 } from "firebase/firestore";
 import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+
 class RecipeService implements IRecipeService {
   constructor(private authService: IAuthService) {}
+
+  private validateRecipeInput(
+    recipe: Pick<Recipe, "title" | "description" | "category">
+  ) {
+    if (!recipe.title || !recipe.title.trim()) {
+      throw new Error("Título da receita é obrigatório.");
+    }
+    if (!recipe.description || !recipe.description.trim()) {
+      throw new Error("Descrição da receita é obrigatória.");
+    }
+    if (!recipe.category) {
+      throw new Error("Categoria da receita é obrigatória.");
+    }
+  }
+
+  private validateImage(image: File) {
+    if (!image.type.startsWith("image/")) {
+      throw new Error("Arquivo inválido. Envie uma imagem.");
+    }
+    if (image.size > MAX_IMAGE_SIZE_BYTES) {
+      throw new Error("Imagem muito grande. Tamanho máximo: 5MB.");
+    }
+  }
 
   async addRecipe(
     recipe: Pick<Recipe, "title" | "description" | "category">,
     image: File | null
   ): Promise<Recipe> {
+    this.validateRecipeInput(recipe);
+
+    if (!image) {
+      throw new Error("Selecione uma imagem para a receita.");
+    }
+
+    this.validateImage(image);
+
     const newRecipeRef = doc(collection(firestore, "recipes"));
     const storageRef = ref(storage, `recipesImages/${newRecipeRef.id}`);
 
     try {
       const userGoogleData = this.authService.getCurrentUser();
 
-      if (!userGoogleData || userGoogleData instanceof Error) {
+      if (!userGoogleData) {
         throw new Error("Usuário não autenticado. Faça login novamente.");
       }
 
-      if (!image) {
-        throw new Error("Selecione uma imagem para a receita.");
-      }
-
-      const userName = (userGoogleData as User)?.displayName || "";
+      const userName = (userGoogleData as User).displayName || "";
 
       await uploadBytes(storageRef, image);
       const downloadURL = await getDownloadURL(storageRef);
@@ -53,37 +82,60 @@ class RecipeService implements IRecipeService {
         createdAt: new Date(),
       };
 
-      await setDoc(newRecipeRef, recipeData);
+      try {
+        await setDoc(newRecipeRef, recipeData);
+      } catch (setDocError) {
+        // Se não conseguir persistir no Firestore, remover o arquivo enviado para evitar orfãos
+        try {
+          await deleteObject(storageRef);
+        } catch {
+          // swallow: se a limpeza falhar, preferimos reportar o erro original de persistência
+        }
+        throw setDocError;
+      }
 
       return recipeData;
     } catch (error: Error | unknown) {
       let errorMessage = "Erro inesperado ao adicionar receita. Por favor, tente novamente.";
-
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-
       throw new Error(errorMessage);
     }
   }
 
   async deleteRecipe(recipeId: string): Promise<void> {
+    const recipeRef = doc(firestore, "recipes", recipeId);
+    const imageRef = ref(storage, `recipesImages/${recipeId}`);
+
+    let imageError: Error | null = null;
+    let docError: Error | null = null;
+
     try {
-      const recipeRef = doc(firestore, "recipes", recipeId);
-      await deleteDoc(recipeRef);
-
-      const imageRef = ref(storage, `recipesImages/${recipeId}`);
       await deleteObject(imageRef);
-
-      return;
-    } catch (error: Error | unknown) {
-      let errorMessage = "Erro inesperado ao deletar receita.";
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-
-      throw new Error(errorMessage);
+    } catch (err) {
+      imageError = err instanceof Error ? err : new Error("Erro ao deletar imagem da storage.");
     }
+
+    try {
+      await deleteDoc(recipeRef);
+    } catch (err) {
+      docError = err instanceof Error ? err : new Error("Erro ao deletar receita do Firestore.");
+    }
+
+    if (imageError && docError) {
+      throw new Error(`Falha ao deletar imagem e documento: ${imageError.message}; ${docError.message}`);
+    }
+
+    if (imageError) {
+      throw new Error(`Receita deletada do banco, porém falha ao deletar imagem: ${imageError.message}`);
+    }
+
+    if (docError) {
+      throw new Error(`Imagem deletada, porém falha ao deletar receita do banco: ${docError.message}`);
+    }
+
+    return;
   }
 
   async updateRecipe(recipeId: string, recipe: Recipe): Promise<Recipe> {
@@ -96,7 +148,6 @@ class RecipeService implements IRecipeService {
         imageUrl: recipe.imageUrl,
         author: recipe.author,
         userId: recipe.userId,
-        createdAt: recipe.createdAt,
         category: recipe.category,
       };
 
@@ -105,13 +156,12 @@ class RecipeService implements IRecipeService {
       return {
         id: recipeId,
         ...updateData,
-      };
+      } as Recipe;
     } catch (error: Error | unknown) {
       let errorMessage = "Erro inesperado ao atualizar receita.";
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-
       throw new Error(errorMessage);
     }
   }

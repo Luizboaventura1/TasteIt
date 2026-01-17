@@ -2,12 +2,12 @@ import { createAsyncThunk, ActionReducerMapBuilder, PayloadAction } from "@redux
 import UserData from "@/interfaces/UserData";
 import ThunkRejectPayload from "../types/ThunkRejectPayload";
 import AuthService from "@/services/authService";
-import DatabaseService from "@/services/databaseService";
+import UserService from "@/services/userService";
 import StoreUser from "../types/StoreUser";
 import UserState from "../types/UserState";
 
 const authService = new AuthService();
-const databaseService = new DatabaseService();
+const databaseService = new UserService();
 
 export const loginWithGoogle = createAsyncThunk<UserData, void, ThunkRejectPayload>(
   "user/loginWithGoogle",
