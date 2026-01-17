@@ -3,9 +3,9 @@ import { FirebaseError } from "firebase/app";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { firestore } from "../lib/firebase/firebase.config";
 import UserData from "@/interfaces/UserData";
-import IDatabaseService from "@/interfaces/IDatabaseService";
+import IUserService from "@/interfaces/IUserService";
 
-class DatabaseService implements IDatabaseService {
+class UserService implements IUserService {
   async checkUserExists(userId: string): Promise<boolean> {
     try {
       const userDocRef = doc(firestore, "users", userId);
@@ -105,4 +105,4 @@ class DatabaseService implements IDatabaseService {
   }
 }
 
-export default DatabaseService;
+export default UserService;

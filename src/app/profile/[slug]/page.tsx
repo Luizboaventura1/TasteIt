@@ -10,7 +10,7 @@ import PrimaryText from "@/components/ui/PrimaryText";
 import RecipeCard from "@/components/ui/RecipeCard";
 import SecondaryText from "@/components/ui/SecondaryText";
 import Skeleton from "@/components/ui/Skeleton";
-import DatabaseService from "@/services/databaseService";
+import UserService from "@/services/userService";
 import { RootState } from "@/store";
 import StoreUser from "@/store/User/types/StoreUser";
 import Image from "next/image";
@@ -28,7 +28,7 @@ export default function Profile() {
 
   const params = useParams();
   const profileUserId = Array.isArray(params.slug) ? params.slug[0] : params.slug ?? "";
-  const databaseService = new DatabaseService();
+  const databaseService = new UserService();
 
   useEffect(() => {
     if (!profileUserId.length) {

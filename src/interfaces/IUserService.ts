@@ -1,10 +1,10 @@
 import UserData from "./UserData";
 
-interface IDatabaseService {
+interface IUserService {
   checkUserExists(userId: string): Promise<boolean>;
   getUserDataById(id: string): Promise<UserData>;
   updateUserData(userData: UserData): Promise<void>;
   createUser(userData: UserData): Promise<void>
 }
 
-export default IDatabaseService;
+export default IUserService;

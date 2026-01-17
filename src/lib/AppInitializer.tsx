@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { initializeUserState } from "@/store/User/userReducer";
 import { auth } from "@/lib/firebase/firebase.config";
-import DatabaseService from "@/services/databaseService";
+import UserService from "@/services/userService";
 import type { AppDispatch } from "@/store";
 import RecipeService from "@/services/recipeService";
 import AuthService from "@/services/authService";
@@ -18,7 +18,7 @@ export default function AppInitializer({ children }: { children: React.ReactNode
       if (!user) return;
 
       try {
-        const databaseService = new DatabaseService();
+        const databaseService = new UserService();
         const userData = await databaseService.getUserDataById(user.uid);
         const allUserRecipes = await new RecipeService(new AuthService())
           .getAllUserRecipes(userData.id)
