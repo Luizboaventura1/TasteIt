@@ -10,62 +10,37 @@ import PrimaryText from "@/components/ui/PrimaryText";
 import RecipeCard from "@/components/ui/RecipeCard";
 import SecondaryText from "@/components/ui/SecondaryText";
 import Skeleton from "@/components/ui/Skeleton";
+import QUERY_KEYS from "@/constants/queryKeys";
+import AuthService from "@/services/authService";
+import RecipeService from "@/services/recipeService";
 import UserService from "@/services/userService";
-import { RootState } from "@/store";
-import StoreUser from "@/store/User/types/StoreUser";
+import getFirstAndLastName from "@/utils/getFirstAndLastName";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import getFirstAndLastName from "@/utils/getFirstAndLastName";
+import { useState } from "react";
 
 export default function Profile() {
-  const loggedUserData = useSelector((state: RootState) => state.user).user;
   const [showAddRecipeModal, setShowAddRecipeModal] = useState(false);
-  const [profileUserData, setProfileUserData] = useState<StoreUser | null>(null);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
-  const [errorFetchingProfile, setErrorFetchingProfile] = useState<string | null>(null);
-
   const params = useParams();
   const profileUserId = Array.isArray(params.slug) ? params.slug[0] : params.slug ?? "";
-  const databaseService = new UserService();
 
-  useEffect(() => {
-    if (!profileUserId.length) {
-      setIsLoadingProfile(false);
-      return;
-    }
+  const userService = new UserService();
+  const authService = new AuthService();
+  const recipeService = new RecipeService(authService);
 
-    setIsLoadingProfile(true);
-    setErrorFetchingProfile(null);
+  const userQuery = useQuery({
+    queryKey: [QUERY_KEYS.PROFILE(profileUserId)],
+    queryFn: async () => userService.getUserDataById(profileUserId),
+  });
 
-    if (loggedUserData?.id === profileUserId) {
-      setProfileUserData(loggedUserData);
-      setIsLoadingProfile(false);
-    } else {
-      databaseService
-        .getUserDataById(profileUserId)
-        .then((user) => {
-          if (user) {
-            setProfileUserData(user as StoreUser);
-          } else {
-            setProfileUserData(null);
-            setErrorFetchingProfile("Usuário não encontrado.");
-          }
-        })
-        .catch((error) => {
-          console.error("Erro ao buscar dados do usuário:", error.message);
-          setErrorFetchingProfile("Erro ao carregar o perfil. Tente novamente.");
-          setProfileUserData(null);
-        })
-        .finally(() => {
-          setIsLoadingProfile(false);
-        });
-    }
-  }, [profileUserId, loggedUserData]);
+  const recipeQuery = useQuery({
+    queryKey: [QUERY_KEYS.USER_RECIPES(profileUserId)],
+    queryFn: async () => recipeService.getAllUserRecipes(profileUserId),
+  });
 
-  const isOwnProfile = loggedUserData?.id === profileUserId;
-  const hasUserRecipes = profileUserData?.recipes && profileUserData.recipes.length > 0;
+  const isOwnProfile = authService.tryGetUserId() === profileUserId;
+  const hasUserRecipes = recipeQuery?.data && recipeQuery.data.length > 0;
 
   return (
     <>
@@ -76,14 +51,14 @@ export default function Profile() {
 
         <main className="w-full max-w-xl mx-auto space-y-4">
           <header className="flex justify-center">
-            {isLoadingProfile ? (
+            {userQuery.isLoading ? (
               <Skeleton className="w-24 h-24 rounded-full" />
-            ) : profileUserData ? (
+            ) : userQuery.data ? (
               <>
-                {profileUserData?.photoURL ? (
+                {userQuery.data?.photoURL ? (
                   <Image
                     className="w-24 h-24 border border-muted rounded-full"
-                    src={profileUserData.photoURL}
+                    src={userQuery.data.photoURL}
                     alt="Foto de perfil do usuário"
                     width={200}
                     height={200}
@@ -113,13 +88,13 @@ export default function Profile() {
           </header>
 
           <section className="flex justify-center">
-            {isLoadingProfile ? (
+            {userQuery.isLoading ? (
               <div className="space-y-2">
                 <Skeleton className="w-28 h-4" />
                 <Skeleton className="w-16 h-4" />
               </div>
-            ) : profileUserData ? (
-              <PrimaryText>{getFirstAndLastName(profileUserData?.name)}</PrimaryText>
+            ) : userQuery.data ? (
+              <PrimaryText>{getFirstAndLastName(userQuery.data?.name)}</PrimaryText>
             ) : (
               <PrimaryText>Perfil não disponível</PrimaryText>
             )}
@@ -138,18 +113,18 @@ export default function Profile() {
             <div className="bg-muted h-[1px] mt-2"></div>
           </section>
 
-          {isLoadingProfile ? (
+          {userQuery.isLoading ? (
             <>
               <Skeleton className="w-full h-4" />
               <Skeleton className="w-3/4 h-4" />
             </>
-          ) : errorFetchingProfile ? (
+          ) : userQuery.isError ? (
             <div className="text-center">
-              <SecondaryText>{errorFetchingProfile}</SecondaryText>
+              <SecondaryText>Erro ao carregar o perfil</SecondaryText>
             </div>
-          ) : profileUserData ? (
+          ) : userQuery.data ? (
             hasUserRecipes ? (
-              profileUserData.recipes!.map((recipe) => (
+              recipeQuery.data!.map((recipe) => (
                 <RecipeCard
                   key={recipe.id}
                   title={recipe.title}
