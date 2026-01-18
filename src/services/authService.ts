@@ -63,6 +63,15 @@ class AuthService implements IAuthService {
 
     return user;
   }
+
+  isAuthenticated(): boolean {
+    return !!auth.currentUser;
+  }
+
+  tryGetUserId(): string | null {
+    const user = auth.currentUser;
+    return user ? user.uid : null;
+  }
 }
 
 export default AuthService;
