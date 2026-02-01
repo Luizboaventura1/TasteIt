@@ -3,9 +3,13 @@ import { FirebaseError } from "firebase/app";
 import { GoogleAuthProvider, signInWithPopup, User } from "firebase/auth";
 import { auth } from "../lib/firebase/firebase.config";
 import IAuthService from "@/interfaces/IAuthService";
+import UserService from "./userService";
+import UserData from "@/interfaces/UserData";
+import Roles from "@/enums/Roles";
 
 class AuthService implements IAuthService {
   private provider = new GoogleAuthProvider();
+  private userService = new UserService();
 
   async loginWithGoogle(): Promise<User> {
     try {
@@ -26,6 +30,41 @@ class AuthService implements IAuthService {
           FirebaseAuthErrorMessages["default"];
       } else if (error instanceof Error) {
         errorMessage = `Erro inesperado: ${error.message}`;
+      }
+
+      throw new Error(errorMessage);
+    }
+  }
+
+  async loginAndEnsureUser(): Promise<User> {
+    try {
+      // 1. Authenticate with Google
+      const user = await this.loginWithGoogle();
+
+      // 2. Check if user exists in Firestore
+      const userExists = await this.userService.checkUserExists(user.uid);
+
+      // 3. Create user document if it doesn't exist
+      if (!userExists) {
+        const userData: UserData = {
+          id: user.uid,
+          email: user.email ?? null,
+          name: user.displayName ?? null,
+          photoURL: user.photoURL ?? null,
+          role: Roles.USER,
+          instagramLink: null,
+          favoriteRecipes: null,
+        };
+
+        await this.userService.createUser(userData);
+      }
+
+      return user;
+    } catch (error: Error | unknown) {
+      let errorMessage = "Erro durante o login e criação do usuário.";
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
       }
 
       throw new Error(errorMessage);
