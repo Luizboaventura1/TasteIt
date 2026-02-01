@@ -1,4 +1,5 @@
 import RecipeCategory from "@/enums/RecipeCategory"
+import RecipeStatus from "@/enums/RecipeStatus"
 
 interface Recipe {
 	id: string,
@@ -6,6 +7,7 @@ interface Recipe {
 	imageUrl: string,
 	author: string,
 	title: string,
+	status: RecipeStatus,
 	description: string,
 	category: RecipeCategory,
 	createdAt: Date | string

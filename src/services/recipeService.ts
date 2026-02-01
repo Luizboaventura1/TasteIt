@@ -1,3 +1,4 @@
+import RecipeStatus from "@/enums/RecipeStatus";
 import IAuthService from "@/interfaces/IAuthService";
 import IRecipeService from "@/interfaces/IRecipeService";
 import Recipe from "@/interfaces/Recipe";
@@ -21,9 +22,7 @@ const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 class RecipeService implements IRecipeService {
   constructor(private authService: IAuthService) {}
 
-  private validateRecipeInput(
-    recipe: Pick<Recipe, "title" | "description" | "category">
-  ) {
+  private validateRecipeInput(recipe: Pick<Recipe, "title" | "description" | "category">) {
     if (!recipe.title || !recipe.title.trim()) {
       throw new Error("Título da receita é obrigatório.");
     }
@@ -46,7 +45,7 @@ class RecipeService implements IRecipeService {
 
   async addRecipe(
     recipe: Pick<Recipe, "title" | "description" | "category">,
-    image: File | null
+    image: File | null,
   ): Promise<Recipe> {
     this.validateRecipeInput(recipe);
 
@@ -76,6 +75,7 @@ class RecipeService implements IRecipeService {
         userId: (userGoogleData as User).uid,
         imageUrl: downloadURL,
         author: userName,
+        status: RecipeStatus.PENDING,
         title: recipe.title,
         description: recipe.description,
         category: recipe.category,
@@ -124,30 +124,63 @@ class RecipeService implements IRecipeService {
     }
 
     if (imageError && docError) {
-      throw new Error(`Falha ao deletar imagem e documento: ${imageError.message}; ${docError.message}`);
+      throw new Error(
+        `Falha ao deletar imagem e documento: ${imageError.message}; ${docError.message}`,
+      );
     }
 
     if (imageError) {
-      throw new Error(`Receita deletada do banco, porém falha ao deletar imagem: ${imageError.message}`);
+      throw new Error(
+        `Receita deletada do banco, porém falha ao deletar imagem: ${imageError.message}`,
+      );
     }
 
     if (docError) {
-      throw new Error(`Imagem deletada, porém falha ao deletar receita do banco: ${docError.message}`);
+      throw new Error(
+        `Imagem deletada, porém falha ao deletar receita do banco: ${docError.message}`,
+      );
     }
 
     return;
   }
 
+  private static isFile = (value: unknown): value is File => {
+    return typeof value === "object" && value !== null && "name" in value && "size" in value;
+  };
+
   async updateRecipe(recipeId: string, recipe: Recipe): Promise<Recipe> {
     try {
       const recipeRef = doc(firestore, "recipes", recipeId);
 
-      const updateData = {
+      // Fetch existing recipe to preserve image if not provided
+      const existingDoc = await getDoc(recipeRef);
+      if (!existingDoc.exists()) {
+        throw new Error("Receita não encontrada.");
+      }
+
+      const existingRecipe = existingDoc.data() as Recipe;
+
+      // Determine final image URL: if caller provided a File, upload it;
+      // if provided a string URL, use it; otherwise keep existing.
+      let finalImageUrl: string | undefined;
+
+      if (RecipeService.isFile(recipe.imageUrl)) {
+        // validate and upload new image, overwrite storage at same path
+        this.validateImage(recipe.imageUrl as File);
+        const storageRef = ref(storage, `recipesImages/${recipeId}`);
+        await uploadBytes(storageRef, recipe.imageUrl as File);
+        finalImageUrl = await getDownloadURL(storageRef);
+      } else if (typeof recipe.imageUrl === "string" && recipe.imageUrl.trim() !== "") {
+        finalImageUrl = recipe.imageUrl;
+      } else {
+        finalImageUrl = existingRecipe.imageUrl;
+      }
+
+      const updateData: Omit<Recipe, "id" | "createdAt" | "author" | "userId"> = {
         title: recipe.title,
         description: recipe.description,
-        imageUrl: recipe.imageUrl,
-        author: recipe.author,
-        userId: recipe.userId,
+        imageUrl: finalImageUrl,
+        status: RecipeStatus.PENDING,
         category: recipe.category,
       };
 
