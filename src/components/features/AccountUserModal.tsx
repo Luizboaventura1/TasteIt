@@ -42,7 +42,7 @@ export default function AccountUserModal() {
   }, []);
 
   const login = useMutation({
-    mutationFn: async () => authService.loginWithGoogle(),
+    mutationFn: async () => authService.loginAndEnsureUser(),
   });
 
   const signOut = useMutation({

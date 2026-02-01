@@ -1,4 +1,4 @@
-import "../globals.css";
+import "../../globals.css";
 import { ReactNode } from "react";
 import ClientLayout from "@/components/features/ClientLayout";
 import LayoutWrapper from "@/components/layouts/LayoutWrapper";

@@ -18,7 +18,7 @@ export default function RecipeCard({ recipeId, title, author, authorId, image }:
   const navigateToRecipePage = () => router.push(`/recipe/${recipeId}`);
   
   return (
-    <div onClick={navigateToRecipePage} className="grid grid-cols-[1fr_auto] gap-3 bg-light hover:-mt-1 shadow-md rounded-xl border border-muted h-full min-h-[140px] overflow-hidden cursor-pointer transition-all duration-300">
+    <div onClick={navigateToRecipePage} className="grid grid-cols-[1fr_auto] gap-3 bg-light shadow-md rounded-xl border border-muted h-full min-h-[140px] overflow-hidden cursor-pointer transition-all duration-300">
       <div className="grid grid-rows-[auto,1fr] p-4 min-h-[140px] text-start">
         <header>
           <PrimaryText className="text-sm sm:text-lg">{title}</PrimaryText>
