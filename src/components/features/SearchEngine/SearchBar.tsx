@@ -15,9 +15,9 @@ export default function SearchBar({ placeholder = "Buscar receita...", ...props 
   return (
     <div
       onClick={handleClick}
-      className="flex items-center gap-4 w-full border border-muted/90 rounded-full px-4 py-1 cursor-pointer"
+      className="flex items-center gap-4 w-full bg-muted/10 border border-muted/90 rounded-full px-4 py-2 cursor-pointer"
     >
-      <SearchIcon size="lg" color="primary" />
+      <SearchIcon size="md" color="primary" />
       <input
         ref={inputRef}
         type="text"

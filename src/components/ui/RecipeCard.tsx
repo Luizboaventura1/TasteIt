@@ -2,17 +2,23 @@ import Image from "next/image";
 import SecondaryText from "./SecondaryText";
 import PrimaryText from "./PrimaryText";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface RecipeCardProps {
+  recipeId: string;
   title: string;
   author: string;
   image?: string;
   authorId: string;
 }
 
-export default function RecipeCard({ title, author, authorId, image }: RecipeCardProps) {
+export default function RecipeCard({ recipeId, title, author, authorId, image }: RecipeCardProps) {
+
+  const router = useRouter();
+  const navigateToRecipePage = () => router.push(`/recipe/${recipeId}`);
+  
   return (
-    <div className="grid grid-cols-[1fr_auto] gap-3 rounded-xl border border-muted h-full min-h-[140px] overflow-hidden">
+    <div onClick={navigateToRecipePage} className="grid grid-cols-[1fr_auto] gap-3 bg-light hover:-mt-1 shadow-md rounded-xl border border-muted h-full min-h-[140px] overflow-hidden cursor-pointer transition-all duration-300">
       <div className="grid grid-rows-[auto,1fr] p-4 min-h-[140px] text-start">
         <header>
           <PrimaryText className="text-sm sm:text-lg">{title}</PrimaryText>

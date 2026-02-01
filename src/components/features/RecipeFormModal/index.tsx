@@ -16,7 +16,7 @@ import { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "../../icons/CloseIcon";
 import PrimaryText from "../../ui/PrimaryText";
-import { QueryClient, useMutation } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import RecipeService from "@/services/recipeService";
 import AuthService from "@/services/authService";
 import QUERY_KEYS from "@/constants/queryKeys";
@@ -41,24 +41,22 @@ export default function RecipeFormModal({
 }: RecipeFormModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [displayImage, setDisplayImage] = useState<string | null>(initialData?.imageUrl ?? null); // To show a preview of the selected image
-  const [isLoading, setIsLoading] = useState(false);
 
   const recipeService = new RecipeService(new AuthService());
-  const queryClient = new QueryClient();
+  const queryClient = useQueryClient();
 
   const createRecipeMutation = useMutation({
-    mutationFn: async (recipe: Recipe) => {
-      return await recipeService.addRecipe(
+    mutationFn: async (recipe: Recipe) =>
+      await recipeService.addRecipe(
         { title: recipe.title, description: recipe.description, category: recipe.category },
-        recipe.imageUrl as unknown as File
-      );
-    },
+        recipe.imageUrl as unknown as File,
+      ),
   });
 
   const editRecipeMutation = useMutation({
-    mutationFn: async (recipe: Recipe) => {
-      return await recipeService.updateRecipe(recipe.id, recipe);
-    },
+    mutationFn: async (recipe: Recipe) => await recipeService.updateRecipe(recipe.id, recipe),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.RECIPE(initialData!.id)] }),
   });
 
   const { control, handleSubmit } = useForm<RecipeFormInputs>({
@@ -77,9 +75,8 @@ export default function RecipeFormModal({
     category,
     imageFile,
   }: RecipeFormInputs) => {
-    setIsLoading(true);
-
     const newRecipeData = {
+      ...(mode === "edit" && initialData ? { id: initialData.id } : {}),
       title,
       description,
       category: category,
@@ -87,8 +84,10 @@ export default function RecipeFormModal({
     } as Recipe;
 
     const onSuccess = () => {
-      setIsLoading(false);
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.USER_RECIPES] });
+      const userId = new AuthService().getUserId();
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.USER_RECIPES(userId)],
+      });
       closeModal();
     };
 
@@ -104,7 +103,7 @@ export default function RecipeFormModal({
 
   const handleFileChange = (
     event: React.ChangeEvent<HTMLInputElement>,
-    fieldOnChange: (...event: unknown[]) => void
+    fieldOnChange: (...event: unknown[]) => void,
   ) => {
     const file = event.target.files?.[0];
 
@@ -157,7 +156,7 @@ export default function RecipeFormModal({
   return (
     <div
       onClick={() => closeModal()}
-      className="flex justify-center items-center fixed z-50 top-0 left-0 w-full h-screen px-4 bg-black/60"
+      className="flex justify-center items-center fixed z-50 top-0 left-0 w-full h-screen px-4 backdrop-blur-xs bg-black/30"
     >
       <main
         onClick={handleClickMain}
@@ -288,7 +287,7 @@ export default function RecipeFormModal({
         </footer>
       </main>
 
-      <Loading isLoading={isLoading} />
+      <Loading isLoading={createRecipeMutation.isPending || editRecipeMutation.isPending} />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import SearchResults from "./SearchResults";
 
 import RecipeCategory from "@/enums/RecipeCategory";
 import Recipe from "@/interfaces/Recipe";
+import RecipeStatus from "@/enums/RecipeStatus";
 
 const mockRecipes: Recipe[] = [
   {
@@ -17,6 +18,7 @@ const mockRecipes: Recipe[] = [
     description: "Um clássico italiano com molho de carne bem temperado.",
     category: RecipeCategory.GLUTEN_FREE,
     createdAt: new Date().toISOString(),
+    status: RecipeStatus.APPROVED,
   },
   {
     id: Math.floor(Math.random() * 100).toString(),
@@ -27,6 +29,7 @@ const mockRecipes: Recipe[] = [
     description: "Salada com alface, frango grelhado, croutons e molho caseiro.",
     category: RecipeCategory.BURGER,
     createdAt: new Date().toISOString(),
+    status: RecipeStatus.APPROVED,
   },
   {
     id: Math.floor(Math.random() * 100).toString(),
@@ -37,6 +40,7 @@ const mockRecipes: Recipe[] = [
     description: "Bolo fofinho e úmido com cobertura de ganache.",
     category: RecipeCategory.DESSERT,
     createdAt: new Date().toISOString(),
+    status: RecipeStatus.APPROVED,
   },
   {
     id: Math.floor(Math.random() * 100).toString(),
@@ -47,6 +51,7 @@ const mockRecipes: Recipe[] = [
     description: "Panquecas fofas servidas com mel e frutas.",
     category: RecipeCategory.BREAKFAST,
     createdAt: new Date().toISOString(),
+    status: RecipeStatus.APPROVED,
   },
   {
     id: Math.floor(Math.random() * 100).toString(),
@@ -57,6 +62,7 @@ const mockRecipes: Recipe[] = [
     description: "Sopa cremosa de abóbora com toque de gengibre.",
     category: RecipeCategory.APPETIZERS,
     createdAt: new Date().toISOString(),
+    status: RecipeStatus.APPROVED,
   },
   {
     id: Math.floor(Math.random() * 100).toString(),
@@ -67,6 +73,7 @@ const mockRecipes: Recipe[] = [
     description: "Mix de frutas frescas com iogurte e granola.",
     category: RecipeCategory.BBQ,
     createdAt: new Date().toISOString(),
+    status: RecipeStatus.APPROVED,
   },
 ];
 
