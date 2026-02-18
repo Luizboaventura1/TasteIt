@@ -10,10 +10,13 @@ import RichTextEditor from "@/components/ui/RichTextEditor";
 import Skeleton from "@/components/ui/Skeleton";
 import QUERY_KEYS from "@/constants/queryKeys";
 import RecipeStatus from "@/enums/RecipeStatus";
+import Roles from "@/enums/Roles";
 import useModal from "@/hooks/useModal";
 import AuthService from "@/services/authService";
+import recipeModerationService from "@/services/recipeModerationService";
 import RecipeService from "@/services/recipeService";
-import { useQuery } from "@tanstack/react-query";
+import UserService from "@/services/userService";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Image from "next/image";
 import Link from "next/link";
@@ -27,8 +30,9 @@ export default function Recipe() {
   const recipeService = new RecipeService(authService);
   const [userId, setUserId] = useState<string | null>(null);
   const addRecipeModal = useModal();
-
+  const queryClient = useQueryClient();
   const router = useRouter();
+  const userService = new UserService();
 
   useEffect(() => {
     const auth = getAuth();
@@ -45,6 +49,21 @@ export default function Recipe() {
       return await recipeService.getRecipeById(recipeId!);
     },
     enabled: !!recipeId,
+  });
+
+  const userQuery = useQuery({
+    queryKey: [QUERY_KEYS.PROFILE(userId!)],
+    queryFn: async () => userService.getUserDataById(userId!),
+    refetchOnWindowFocus: false,
+  });
+
+  const changeRecipeStatus = useMutation({
+    mutationFn: ({ recipeId, newStatus }: { recipeId: string; newStatus: RecipeStatus }) =>
+      recipeModerationService.changeRecipeStatus(recipeId, newStatus),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.RECIPE(recipeId!)] });
+      router.push("/dashboard");
+    },
   });
 
   if (isLoading) {
@@ -66,6 +85,34 @@ export default function Recipe() {
     <div className="container mx-auto px-4 min-h-screen">
       <nav className="flex flex-col-reverse md:flex-row justify-between gap-4 mt-24">
         <section className="space-y-4">
+          {/* Botões para aprovar ou rejeitar a receita */}
+          {userQuery.data?.role === Roles.ADMIN && data.status === RecipeStatus.PENDING && (
+            <div className="flex gap-2">
+              <button
+                onClick={() =>
+                  changeRecipeStatus.mutate({
+                    recipeId: recipeId as string,
+                    newStatus: RecipeStatus.APPROVED,
+                  })
+                }
+                className="rounded-lg text-green-600 font-medium bg-green-500/20 hover:bg-green-500/40 transition-colors duration-300 cursor-pointer px-4 py-2"
+              >
+                Aprovar
+              </button>
+              <button
+                onClick={() =>
+                  changeRecipeStatus.mutate({
+                    recipeId: recipeId as string,
+                    newStatus: RecipeStatus.REJECTED,
+                  })
+                }
+                className="rounded-lg text-red-600 font-medium bg-red-500/20 hover:bg-red-500/40 transition-colors duration-300 cursor-pointer px-4 py-2"
+              >
+                Rejeitar
+              </button>
+            </div>
+          )}
+
           <PrimaryText size="lg">{data.title}</PrimaryText>
 
           <div className="max-w-[600px] w-full aspect-[3/2] mx-auto overflow-hidden rounded-2xl">
